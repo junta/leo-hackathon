@@ -1,22 +1,43 @@
 program auction.aleo;
 
-mapping deposits:
-    key as field.public;
+record Deposit:
+    owner as address.private;
+    round as u8.private;
+    user as address.private;
+    amount as u64.private;
+
+mapping total_deposits:
+    key as u8.public;
     value as u64.public;
 
-mapping reward_pool:
-    key as u64.public;
-    value as u64.public;
+mapping current_winner:
+    key as u8.public;
+    value as field.public;
 
 function deposit:
     input r0 as u64.private;
     hash.bhp256 self.caller into r1 as field;
-    async deposit r1 r0 into r2;
-    output r2 as auction.aleo/deposit.future;
+    cast aleo1ashyu96tjwe63u0gtnnv8z5lhapdu4l5pjsl2kha7fv7hvz2eqxs5dz0rg 0u8 self.caller r0 into r2 as Deposit.record;
+    output r2 as Deposit.record;
 
-finalize deposit:
+function settle_deposit:
+    input r0 as Deposit.record;
+    hash.bhp256 self.caller into r1 as field;
+    async settle_deposit r1 r0.amount into r2;
+    output r2 as auction.aleo/settle_deposit.future;
+
+finalize settle_deposit:
     input r0 as field.public;
     input r1 as u64.public;
-    get.or_use deposits[r0] 0u64 into r2;
+    get.or_use total_deposits[0u8] 0u64 into r2;
     add r2 r1 into r3;
-    set r3 into deposits[r0];
+    set r3 into total_deposits[0u8];
+
+function get_total_deposits:
+    input r0 as u8.private;
+    async get_total_deposits r0 into r1;
+    output r1 as auction.aleo/get_total_deposits.future;
+
+finalize get_total_deposits:
+    input r0 as u8.public;
+    get total_deposits[r0] into r1;

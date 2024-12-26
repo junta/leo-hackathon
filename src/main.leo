@@ -1,9 +1,18 @@
-program auction.aleo {
-    // Define mappings to store user deposits and winner data
-    mapping deposits: field => u64;
+program blind_staking.aleo {
+    // round -> deposit amount
+    mapping total_deposits: u8 => u64;
 
-    // Define a mapping to store the reward token amount
-    mapping reward_pool: u64 => u64;
+    mapping num_deposits: u8 => u64;
+
+    // round -> winner hash address
+    mapping current_winner: u8 => field;
+
+    record Deposit {
+        owner: address,
+        round: u8,
+        user: address,
+        amount: u64,
+    }
 
     // Constructor to initialize the owner
     // transition setup(public initial_reward: u64) {
@@ -13,20 +22,42 @@ program auction.aleo {
     // }
 
     // Function to deposit tokens into the contract
-    async transition deposit(amount: u64) -> Future {
+    transition deposit(amount: u64) -> Deposit {
         // let lock_period: u64 = block.height) + 168u64; // Lock for 1 week (1 round)
         // let height: u32 = block.height; // Lock for 1 week (1 round)
         // let lock_period: u32 = height + 168u32;
 
         let hash: field = BHP256::hash_to_field(self.caller);
 
-        // Update the user's deposit
-        return finalize_deposit(hash, amount);
+        return Deposit {
+            round: 0u8,
+            owner: aleo1ashyu96tjwe63u0gtnnv8z5lhapdu4l5pjsl2kha7fv7hvz2eqxs5dz0rg,
+            user: self.caller,
+            amount: amount
+        };
+    }
+
+    async transition settle_deposit(settle_depost: Deposit) -> Future {
+        let hash: field = BHP256::hash_to_field(self.caller);
+
+        return finalize_deposit(hash, settle_depost.amount);
     }
 
     async function finalize_deposit(hash: field, amount: u64) {
-        let existing_amount: u64 = Mapping::get_or_use(deposits, hash, 0u64);
-        Mapping::set(deposits, hash, existing_amount + amount);    
+        let current_round: u8 = 0u8;
+        let existing_amount: u64 = Mapping::get_or_use(total_deposits, current_round, 0u64);
+        Mapping::set(total_deposits, current_round, existing_amount + amount);    
+
+        let current_num_deposits: u64 = Mapping::get_or_use(num_deposits, current_round, 0u64);
+        Mapping::set(total_deposits, current_round, current_num_deposits + 1u64);    
+    }
+
+    async transition get_total_deposits(round: u8) -> Future {
+       return get_total_deposits_from_chain(round);
+    }
+
+    async function get_total_deposits_from_chain(round: u8) {
+        Mapping::get(total_deposits, round);
     }
 
     // // Function to withdraw deposit (only after lock period)
