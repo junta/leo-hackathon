@@ -1,3 +1,5 @@
+import token.aleo;
+
 program blind_staking.aleo {
     // round -> deposit amount
     mapping total_deposits: u8 => u64;
