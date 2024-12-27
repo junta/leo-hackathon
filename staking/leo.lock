@@ -1,0 +1,6 @@
+[[package]]
+name = "token.aleo"
+location = "local"
+path = "/Users/okudajunta/Documents/apyvision/leo-hackathon/staking/../token"
+checksum = "13c44db5b0128706a0c26d4e2f7bcc806bd024709e14241d8563cc290c1203a8"
+dependencies = []

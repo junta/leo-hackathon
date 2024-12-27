@@ -1,0 +1,13 @@
+{
+  "program": "blind_staking.aleo",
+  "version": "0.0.0",
+  "description": "",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "token.aleo",
+      "location": "local",
+      "path": "../token"
+    }
+  ]
+}
